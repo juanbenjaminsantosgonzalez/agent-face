@@ -1,3 +1,18 @@
+import os
+import shutil
+
+# Autocreate .env from .env.example if missing
+backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env_path = os.path.join(backend_dir, ".env")
+env_example_path = os.path.join(backend_dir, ".env.example")
+
+if not os.path.exists(env_path) and os.path.exists(env_example_path):
+    try:
+        shutil.copy(env_example_path, env_path)
+        print(f"Created .env file from .env.example at: {env_path}")
+    except Exception as e:
+        print(f"Could not copy .env.example to .env: {e}")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
@@ -37,11 +52,20 @@ app.include_router(face_attributes.router)
 
 @app.get("/", tags=["Health"])
 async def root():
+    settings = get_settings()
+    configured = (
+        bool(settings.azure_face_key) 
+        and bool(settings.azure_face_endpoint) 
+        and "TU_API_KEY" not in settings.azure_face_key 
+        and "TU_REGION" not in settings.azure_face_endpoint
+    )
     return {
         "status": "online",
         "agent": "Face Agent API",
         "version": "1.0.0",
         "docs": "/docs",
+        "azure_configured": configured,
+        "mock_mode": False,
         "modules": [
             "POST /face-detection/detect",
             "POST /identity-verification/verify",
@@ -52,4 +76,15 @@ async def root():
 
 @app.get("/health", tags=["Health"])
 async def health():
-    return {"status": "ok"}
+    settings = get_settings()
+    configured = (
+        bool(settings.azure_face_key) 
+        and bool(settings.azure_face_endpoint) 
+        and "TU_API_KEY" not in settings.azure_face_key 
+        and "TU_REGION" not in settings.azure_face_endpoint
+    )
+    return {
+        "status": "ok",
+        "azure_configured": configured,
+        "mock_mode": False
+    }

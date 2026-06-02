@@ -43,9 +43,22 @@ export default function App() {
               <span>Azure Cognitive Services · FastAPI</span>
             </div>
           </div>
-          <div className="status-pill">
-            <div className="status-dot" />
-            AGENT ONLINE · :8000
+          <div className="status-pill" style={{
+            borderColor: api.apiConfig.online
+              ? (api.apiConfig.azureConfigured ? 'rgba(0, 255, 136, 0.4)' : 'rgba(255, 184, 0, 0.4)')
+              : 'rgba(255, 71, 87, 0.4)'
+          }}>
+            <div className="status-dot" style={{
+              background: api.apiConfig.online
+                ? (api.apiConfig.azureConfigured ? 'var(--green)' : 'var(--amber)')
+                : 'var(--red)',
+              boxShadow: api.apiConfig.online
+                ? (api.apiConfig.azureConfigured ? '0 0 6px var(--green)' : '0 0 6px var(--amber)')
+                : '0 0 6px var(--red)'
+            }} />
+            {!api.apiConfig.online 
+              ? 'AGENT OFFLINE · :8000'
+              : (api.apiConfig.azureConfigured ? 'AZURE ACTIVE · :8000' : 'SIN CREDENCIALES · :8000')}
           </div>
         </header>
 

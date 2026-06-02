@@ -17,8 +17,8 @@ class DetectRequest(BaseModel):
     @field_validator("imageUrl")
     @classmethod
     def must_be_url(cls, v: str) -> str:
-        if not v.startswith(("http://", "https://")):
-            raise ValueError("imageUrl debe ser una URL válida (http/https)")
+        if not v.startswith(("http://", "https://", "data:image/")):
+            raise ValueError("imageUrl debe ser una URL válida (http/https) o una imagen codificada en base64")
         return v
 
 
@@ -42,8 +42,8 @@ class VerifyRequest(BaseModel):
     @field_validator("imageUrl1", "imageUrl2")
     @classmethod
     def must_be_url(cls, v: str) -> str:
-        if not v.startswith(("http://", "https://")):
-            raise ValueError("Debe ser una URL válida (http/https)")
+        if not v.startswith(("http://", "https://", "data:image/")):
+            raise ValueError("Debe ser una URL válida (http/https) o una imagen codificada en base64")
         return v
 
 
@@ -53,6 +53,8 @@ class VerifyResponse(BaseModel):
     confidence: float
     confidencePercent: int
     verdict: str
+    faceRectangle1: Optional[FaceRectangle] = None
+    faceRectangle2: Optional[FaceRectangle] = None
 
 
 # ── ATTRIBUTES ────────────────────────────────────────────────────────────────
@@ -62,8 +64,8 @@ class AttributeRequest(BaseModel):
     @field_validator("imageUrl")
     @classmethod
     def must_be_url(cls, v: str) -> str:
-        if not v.startswith(("http://", "https://")):
-            raise ValueError("imageUrl debe ser una URL válida")
+        if not v.startswith(("http://", "https://", "data:image/")):
+            raise ValueError("imageUrl debe ser una URL válida o una imagen codificada en base64")
         return v
 
 

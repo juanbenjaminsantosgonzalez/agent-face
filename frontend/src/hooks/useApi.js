@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
 const API_KEY  = import.meta.env.VITE_API_KEY  || ''
@@ -10,10 +10,36 @@ function ts() {
 export function useApi() {
   const [loading, setLoading] = useState(false)
   const [logs, setLogs]       = useState([])
+  const [apiConfig, setApiConfig] = useState({ mockMode: true, online: false })
 
   const addLog = useCallback((type, msg) => {
     setLogs(prev => [...prev, { type, msg, ts: ts() }].slice(-40))
   }, [])
+
+  const checkStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/health`)
+      if (res.ok) {
+        const data = await res.json()
+        setApiConfig({ 
+          mockMode: !!data.mock_mode, 
+          azureConfigured: !!data.azure_configured, 
+          online: true 
+        })
+      } else {
+        setApiConfig({ mockMode: false, azureConfigured: false, online: false })
+      }
+    } catch (e) {
+      setApiConfig({ mockMode: false, azureConfigured: false, online: false })
+    }
+  }, [])
+
+  useEffect(() => {
+    checkStatus()
+    // Poll every 10 seconds
+    const interval = setInterval(checkStatus, 10000)
+    return () => clearInterval(interval)
+  }, [checkStatus])
 
   const call = useCallback(async (endpoint, body) => {
     setLoading(true)
@@ -42,5 +68,5 @@ export function useApi() {
     }
   }, [addLog])
 
-  return { loading, logs, call, addLog }
+  return { loading, logs, call, addLog, apiConfig, checkStatus }
 }

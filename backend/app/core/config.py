@@ -3,8 +3,8 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    azure_face_key: str
-    azure_face_endpoint: str
+    azure_face_key: str = ""
+    azure_face_endpoint: str = ""
     app_api_key: str = ""
     cors_origins: str = "http://localhost:5173"
 

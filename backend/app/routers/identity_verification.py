@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.models.schemas import VerifyRequest, VerifyResponse
+from app.models.schemas import VerifyRequest, VerifyResponse, FaceRectangle
 from app.services.azure_face import AzureFaceService
 from app.core.security import verify_api_key
 
@@ -60,4 +60,6 @@ async def verify_identity(
         confidence=round(confidence, 4),
         confidencePercent=pct,
         verdict=verdict,
+        faceRectangle1=FaceRectangle(**faces1[0]["faceRectangle"]),
+        faceRectangle2=FaceRectangle(**faces2[0]["faceRectangle"]),
     )
